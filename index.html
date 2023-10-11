@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css" />
+  <script src="script.js"></script>
+  <!-- <link rel="stylesheet" href="./styles.css"> -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
+  <title>PROJECT MANAGEMENT TOOL</title>
+</head>
+
+<body>
+  <header>
+    <h1>PROJECT MANAGEMENT TOOL</h1>
+  </header>
+  <div class="container-wrapper">
+   
+    <div class="container">
+      <h2>Project Dasboard</h2>
+      <div class="form-group">
+        <h5>Add New User</h5>
+        <input type="text" name="new_project" id="add-project" class="form-control" placeholder="User Name" />
+
+        <button type="button" onclick="taskObj.addProject();" class="btn btn-primary" style="margin-top: 10px">
+          Add User
+        </button>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2 class="h2">Project Overview</h2> <br/>
+      <div class="top">
+        <div class="row" style="margin-bottom: 50px">
+        
+          <div class="col-md-12">
+            
+            <form method="POST" onsubmit="return taskObj.deleteProject(this);" style="display: contents">
+              <select name="project" class="form-control" style="
+                  display: initial;
+                  width: 200px;
+                  margin-left: 5px;
+                  margin-right: 6px;
+                " id="form-task-hour-calculator-all-projects"></select> </form><br>
+              <input type="submit" class="btn btn-danger" value="Delete User" />
+            </form>
+  
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTaskModal">
+              Add Task
+            </button>
+  
+          </div>
+        </div>
+  
+        <!--Chatbox-->
+      <div class="chat">
+        <h4>Chatbox</h4>
+        <div class="chat-container"> 
+          <div class="user-details">
+            <input type="text" id="name-input" placeholder="User Name" />
+          </div>
+          <div id="chat-messages"></div>
+  
+          <form id="chat-form">
+            <input type="text" id="message-input" placeholder="Type your message..." />
+            <input class="send" type="submit" value="Send" />
+          </form>
+        </div>
+      </div>
+      </div>
+
+      <!--JS Code of Chatbox-->
+      <script>
+        const form = document.getElementById('chat-form');
+        const messageInput = document.getElementById('message-input');
+        const nameInput = document.getElementById('name-input');
+        const chatMessages = document.getElementById('chat-messages');
+
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+
+          const message = messageInput.value.trim();
+          const name = nameInput.value.trim();
+
+          if (message !== '' && name !== '') {
+            let userColor = localStorage.getItem(name);
+            if (!userColor) {
+              userColor = getRandomColor();
+              localStorage.setItem(name, userColor);
+            }
+
+            const messageElement = document.createElement('p');
+            messageElement.classList.add('message');
+
+            if (nameInput.value === name) {
+              messageElement.classList.add('user-message');
+              messageElement.style.backgroundColor = userColor;
+            } else {
+              messageElement.classList.add('other-message');
+            }
+
+            messageElement.textContent = `${name}: ${message}`;
+
+            chatMessages.appendChild(messageElement);
+
+            messageInput.value = '';
+
+            saveChatHistory();
+          }
+        });
+
+        //For generating random colors for each user.
+        function getRandomColor() {
+          const colors = ['#ff0000', '#000f0f', '#0000ff', '# #007b9f', '#ffff00', '# #007bff'];
+          return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function saveChatHistory() {
+          const messages = chatMessages.innerHTML;
+          localStorage.setItem('chatHistory', messages);
+        }
+
+        function loadChatHistory() {
+          const chatHistory = localStorage.getItem('chatHistory');
+          if (chatHistory) {
+            chatMessages.innerHTML = chatHistory;
+          }
+        }
+
+        // Load chat history on page load
+        window.addEventListener('load', function () {
+          loadChatHistory();
+        });
+
+      </script>
+
+      <table class="table">
+        <tr>
+          <th style="background-color: #007bff;">Task</th>
+          <th style="background-color: #007bff;">User Name</th>
+          <th style="background-color: #007bff;">Task Status</th>
+          <th style="background-color: #007bff;">Duration</th>
+          <th style="background-color: #007bff;">Date</th>
+          <th style="background-color: #007bff;">Change Status</th>
+        </tr>
+
+        <tbody id="all-tasks"></tbody>
+      </table>
+    </div>
+
+    <div class="modal fade" id="addTaskModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add Task</h5>
+            <button class="close" type="button" data-dismiss="modal">x</button>
+          </div>
+
+          <div class="modal-body">
+            <form method="POST" onsubmit="return taskObj.addTask(this);" id="form-task-hour-calculator">
+              <div class="form-group">
+                <label>User</label>
+                <select name="project" id="add-task-project" class="form-control" required></select>
+              </div>
+
+              <div class="form-group">
+                <label>Task</label>
+                <input type="text" name="task" class="form-control" placeholder="What are you going to do ?" required />
+              </div>
+            </form>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">
+              Close
+            </button>
+            <button type="submit" form="form-task-hour-calculator" class="btn btn-primary">
+              Add Task
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer>
+   <p>CopyRights Reserved by Srikanth.</p>
+  </footer>
+</body>
+
+</html>
